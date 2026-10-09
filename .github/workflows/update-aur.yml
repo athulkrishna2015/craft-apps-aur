@@ -10,14 +10,14 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: archlinux:latest
     steps:
       - name: Install packaging tools
         run: pacman -Syu --noconfirm --needed base-devel git openssh curl python
 
       - name: Check out package definitions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare unprivileged build user and AUR SSH key
         env:

@@ -1,6 +1,6 @@
 # Storytold Craft apps — AUR binary packages
 
-This repository maintains prebuilt AUR packages for the Linux releases of four Storytold apps:
+This repository maintains prebuilt AUR packages for the Linux releases of six Storytold apps:
 
 | App | AUR package | Upstream |
 | --- | --- | --- |
@@ -45,3 +45,7 @@ soundcraft-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.
+
+## Not covered here
+
+[filmcraft-bin](https://aur.archlinux.org/packages/filmcraft-bin) already exists under a different maintainer but is stale (0.2.1 while upstream is at 0.4.0) and flagged out-of-date. Per AUR etiquette this repo does not ship a competing package; if it gets orphaned, it can be adopted and brought up to date instead.

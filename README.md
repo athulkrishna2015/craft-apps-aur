@@ -8,6 +8,8 @@ This repository maintains prebuilt AUR packages for the Linux releases of four S
 | DeckCraft | [deckcraft-bin](https://aur.archlinux.org/packages/deckcraft-bin) | [storytold/deckcraft](https://github.com/storytold/deckcraft) |
 | GridCraft | [gridcraft-bin](https://aur.archlinux.org/packages/gridcraft-bin) | [storytold/gridcraft](https://github.com/storytold/gridcraft) |
 | WordCraft | [wordcraft-bin](https://aur.archlinux.org/packages/wordcraft-bin) | [storytold/wordcraft](https://github.com/storytold/wordcraft) |
+| CADCraft | [cadcraft-bin](https://aur.archlinux.org/packages/cadcraft-bin) | [storytold/cadcraft](https://github.com/storytold/cadcraft) |
+| SoundCraft | [soundcraft-bin](https://aur.archlinux.org/packages/soundcraft-bin) | [storytold/soundcraft](https://github.com/storytold/soundcraft) |
 
 The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Each `PKGBUILD` supports both `x86_64` and `aarch64`. `makepkg` selects the matching artifact for the build architecture.
 
@@ -38,6 +40,8 @@ pdfcraft-bin/
 deckcraft-bin/
 gridcraft-bin/
 wordcraft-bin/
+cadcraft-bin/
+soundcraft-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.

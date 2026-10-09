@@ -1,0 +1,43 @@
+name: Update AUR packages
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # Daily at 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install packaging tools
+        run: pacman -Syu --noconfirm --needed base-devel git openssh curl python
+
+      - name: Check out package definitions
+        uses: actions/checkout@v4
+
+      - name: Prepare unprivileged build user and AUR SSH key
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          test -n "$AUR_SSH_PRIVATE_KEY" || { echo 'Missing AUR_SSH_PRIVATE_KEY secret' >&2; exit 1; }
+          useradd --create-home --uid 1001 builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          install -d -m 700 -o builder -g builder /home/builder/.ssh
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > /home/builder/.ssh/aur
+          chmod 600 /home/builder/.ssh/aur
+          chown builder:builder /home/builder/.ssh/aur
+          cat > /home/builder/.ssh/config <<'EOF'
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            IdentitiesOnly yes
+            StrictHostKeyChecking accept-new
+          EOF
+          chown builder:builder /home/builder/.ssh/config
+          chmod 600 /home/builder/.ssh/config
+
+      - name: Update and push changed packages
+        run: su builder -c 'cd "$GITHUB_WORKSPACE" && ./update.sh --push'

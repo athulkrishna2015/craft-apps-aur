@@ -15,7 +15,7 @@ The packages install upstream prebuilt Linux release tarballs; they do not compi
 
 ## Automatic updates
 
-The GitHub Actions workflow in `.github/workflows/update-aur.yml` checks upstream GitHub releases daily at 06:17 UTC. When a new release is available, `update.sh` updates `pkgver`, refreshes architecture-specific SHA-256 sums from the release's `SHA256SUMS.txt`, regenerates `.SRCINFO`, and pushes the changes to the corresponding AUR package repository. The workflow can also be run manually from the repository's **Actions** tab.
+The GitHub Actions workflow in `.github/workflows/update-aur.yml` checks upstream GitHub releases twice daily at 04:17 and 16:17 UTC. When a new release is available, `update.sh` updates `pkgver`, refreshes architecture-specific SHA-256 sums from the release's `SHA256SUMS.txt`, regenerates `.SRCINFO`, and pushes the changes to the corresponding AUR package repository. The workflow can also be run manually from the repository's **Actions** tab.
 
 The workflow requires the repository secret `AUR_SSH_PRIVATE_KEY`, whose public key must be registered with the AUR account that maintains these packages. Never commit the private key to this repository.
 

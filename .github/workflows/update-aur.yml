@@ -2,7 +2,7 @@ name: Update AUR packages
 
 on:
   schedule:
-    - cron: "17 6 * * *" # Daily at 06:17 UTC
+    - cron: "17 4,16 * * *" # Twice daily at 04:17 and 16:17 UTC, just after the usual upstream release batches
   workflow_dispatch:
 
 permissions:

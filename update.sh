@@ -21,20 +21,19 @@ for dir in *-bin; do
 
 	if [[ "$latest" == "$current" ]]; then
 		printf '%s: up to date (%s)\n' "$dir" "$current"
-		continue
+	else
+		printf '%s: %s -> %s\n' "$dir" "$current" "$latest"
+		sums=$(curl -fsSL "$url/releases/download/$tag/SHA256SUMS.txt")
+		getsum() { grep -E "  $_pkgname-$latest-linux-$1\.tar\.gz$" <<<"$sums" | cut -d' ' -f1; }
+		sha_x86=$(getsum x86_64)
+		sha_arm=$(getsum aarch64)
+		[[ -n "$sha_x86" && -n "$sha_arm" ]] || { echo "$dir: hashes missing in SHA256SUMS.txt" >&2; exit 1; }
+
+		sed -i -e "s/^pkgver=.*/pkgver=$latest/" -e 's/^pkgrel=.*/pkgrel=1/' "$pkgfile"
+		sed -i -e "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$sha_x86')/" \
+			-e "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$sha_arm')/" "$pkgfile"
+		(cd "$dir" && makepkg --printsrcinfo > .SRCINFO)
 	fi
-
-	printf '%s: %s -> %s\n' "$dir" "$current" "$latest"
-	sums=$(curl -fsSL "$url/releases/download/$tag/SHA256SUMS.txt")
-	getsum() { grep -E "  $_pkgname-$latest-linux-$1\.tar\.gz$" <<<"$sums" | cut -d' ' -f1; }
-	sha_x86=$(getsum x86_64)
-	sha_arm=$(getsum aarch64)
-	[[ -n "$sha_x86" && -n "$sha_arm" ]] || { echo "$dir: hashes missing in SHA256SUMS.txt" >&2; exit 1; }
-
-	sed -i -e "s/^pkgver=.*/pkgver=$latest/" -e 's/^pkgrel=.*/pkgrel=1/' "$pkgfile"
-	sed -i -e "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$sha_x86')/" \
-		-e "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$sha_arm')/" "$pkgfile"
-	(cd "$dir" && makepkg --printsrcinfo > .SRCINFO)
 
 	if (( PUSH )); then
 		work=$(mktemp -d)

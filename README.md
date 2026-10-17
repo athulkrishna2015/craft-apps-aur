@@ -1,6 +1,6 @@
 # Storytold Craft apps — AUR binary packages
 
-This repository maintains prebuilt AUR packages for the Linux releases of six Storytold apps:
+This repository maintains prebuilt AUR packages for the Linux releases of Storytold apps:
 
 | App | AUR package | Upstream |
 | --- | --- | --- |
@@ -10,6 +10,7 @@ This repository maintains prebuilt AUR packages for the Linux releases of six St
 | WordCraft | [wordcraft-bin](https://aur.archlinux.org/packages/wordcraft-bin) | [storytold/wordcraft](https://github.com/storytold/wordcraft) |
 | CADCraft | [cadcraft-bin](https://aur.archlinux.org/packages/cadcraft-bin) | [storytold/cadcraft](https://github.com/storytold/cadcraft) |
 | SoundCraft | [soundcraft-bin](https://aur.archlinux.org/packages/soundcraft-bin) | [storytold/soundcraft](https://github.com/storytold/soundcraft) |
+| FigCraft | [figcraft-bin](https://aur.archlinux.org/packages/figcraft-bin) | [storytold/figcraft](https://github.com/storytold/figcraft) |
 
 The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Each `PKGBUILD` supports both `x86_64` and `aarch64`. `makepkg` selects the matching artifact for the build architecture.
 
@@ -42,6 +43,7 @@ gridcraft-bin/
 wordcraft-bin/
 cadcraft-bin/
 soundcraft-bin/
+figcraft-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.

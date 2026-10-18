@@ -11,6 +11,7 @@ This repository maintains prebuilt AUR packages for the Linux releases of Storyt
 | CADCraft | [cadcraft-bin](https://aur.archlinux.org/packages/cadcraft-bin) | [storytold/cadcraft](https://github.com/storytold/cadcraft) |
 | SoundCraft | [soundcraft-bin](https://aur.archlinux.org/packages/soundcraft-bin) | [storytold/soundcraft](https://github.com/storytold/soundcraft) |
 | FigCraft | [figcraft-bin](https://aur.archlinux.org/packages/figcraft-bin) | [storytold/figcraft](https://github.com/storytold/figcraft) |
+| Craft Launcher | [craft-launcher-bin](https://aur.archlinux.org/packages/craft-launcher-bin) | [storytold/craft-launcher](https://github.com/storytold/craft-launcher) |
 
 The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Each `PKGBUILD` supports both `x86_64` and `aarch64`. `makepkg` selects the matching artifact for the build architecture.
 
@@ -44,6 +45,7 @@ wordcraft-bin/
 cadcraft-bin/
 soundcraft-bin/
 figcraft-bin/
+craft-launcher-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.

@@ -12,6 +12,11 @@ for dir in *-bin; do
 	[[ -d "$dir" ]] || continue
 	pkgfile="$dir/PKGBUILD"
 	_pkgname="${dir%-bin}"
+	# Release artifacts can be named after the binary rather than the repo
+	# (e.g. craft-launcher ships artcraft-launcher-*). PKGBUILD declares _distname
+	# to override; it defaults to the repo name.
+	_distname=$(grep -E '^_distname=' "$pkgfile" | cut -d= -f2- | tr -d "'\"" || true)
+	_distname="${_distname:-$_pkgname}"
 	url="https://github.com/storytold/$_pkgname"
 
 	tag=$(curl -fsSL "https://api.github.com/repos/storytold/$_pkgname/releases/latest" \
@@ -24,7 +29,7 @@ for dir in *-bin; do
 	else
 		printf '%s: %s -> %s\n' "$dir" "$current" "$latest"
 		sums=$(curl -fsSL "$url/releases/download/$tag/SHA256SUMS.txt")
-		getsum() { grep -E "  $_pkgname-$latest-linux-$1\.tar\.gz$" <<<"$sums" | cut -d' ' -f1; }
+		getsum() { grep -E "  $_distname-$latest-linux-$1\.tar\.gz$" <<<"$sums" | cut -d' ' -f1; }
 		sha_x86=$(getsum x86_64)
 		sha_arm=$(getsum aarch64)
 		[[ -n "$sha_x86" && -n "$sha_arm" ]] || { echo "$dir: hashes missing in SHA256SUMS.txt" >&2; exit 1; }

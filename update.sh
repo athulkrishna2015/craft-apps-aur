@@ -23,6 +23,7 @@ for dir in *-bin; do
 		| python3 -c 'import sys,json; print(json.load(sys.stdin)["tag_name"])')
 	latest="${tag#v}"
 	current=$(grep -E '^pkgver=' "$pkgfile" | cut -d= -f2)
+	pkgrel=$(grep -E '^pkgrel=' "$pkgfile" | cut -d= -f2)
 
 	if [[ "$latest" == "$current" ]]; then
 		printf '%s: up to date (%s)\n' "$dir" "$current"
@@ -47,13 +48,15 @@ for dir in *-bin; do
 		git -C "$work/$dir" add PKGBUILD .SRCINFO
 		if git -C "$work/$dir" diff --cached --quiet; then
 			rm -rf "$work"
-			printf '%s: AUR already has %s-1; no push needed\n' "$dir" "$latest"
+			printf '%s: AUR already has %s-%s; no push needed\n' "$dir" "$latest" "$pkgrel"
 			continue
 		fi
+		# Re-read pkgrel after any sed bump above so the message matches.
+		pkgrel=$(grep -E '^pkgrel=' "$pkgfile" | cut -d= -f2)
 		git -C "$work/$dir" -c user.name="${GIT_AUTHOR_NAME:-aur}" -c user.email="${GIT_AUTHOR_EMAIL:-aur@localhost}" \
-			commit -qm "Update to $latest-1"
+			commit -qm "Update to $latest-$pkgrel"
 		git -C "$work/$dir" push -q
 		rm -rf "$work"
-		printf '%s: pushed %s-1 to AUR\n' "$dir" "$latest"
+		printf '%s: pushed %s-%s to AUR\n' "$dir" "$latest" "$pkgrel"
 	fi
 done

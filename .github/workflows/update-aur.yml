@@ -40,4 +40,8 @@ jobs:
           chmod 600 /home/builder/.ssh/config
 
       - name: Update and push changed packages
-        run: su builder -c 'cd "$GITHUB_WORKSPACE" && ./update.sh --push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # -m keeps GITHUB_TOKEN in the environment; HOME is restored so the
+        # builder user's SSH config and AUR key are found.
+        run: su -m builder -c 'cd "$GITHUB_WORKSPACE" && HOME=/home/builder ./update.sh --push'

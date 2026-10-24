@@ -19,8 +19,19 @@ for dir in *-bin; do
 	_distname="${_distname:-$_pkgname}"
 	url="https://github.com/storytold/$_pkgname"
 
-	tag=$(curl -fsSL "https://api.github.com/repos/storytold/$_pkgname/releases/latest" \
-		| python3 -c 'import sys,json; print(json.load(sys.stdin)["tag_name"])')
+	# Authenticate GitHub API calls when a token is available. Unauthenticated
+	# requests are capped at 60/hour per IP and GitHub-hosted runners share IPs,
+	# so CI intermittently gets 403s without this.
+	api_args=(--retry 3 --retry-delay 5 -H "Accept: application/vnd.github+json")
+	if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+		api_args+=(-H "Authorization: Bearer $GITHUB_TOKEN")
+	fi
+
+	release_json=$(curl -fsSL "${api_args[@]}" \
+		"https://api.github.com/repos/storytold/$_pkgname/releases/latest") \
+		|| { echo "$dir: GitHub API request failed (rate limited? set GITHUB_TOKEN)" >&2; exit 1; }
+	tag=$(python3 -c 'import sys,json; print(json.load(sys.stdin)["tag_name"])' <<<"$release_json") \
+		|| { echo "$dir: could not parse latest release tag" >&2; exit 1; }
 	latest="${tag#v}"
 	current=$(grep -E '^pkgver=' "$pkgfile" | cut -d= -f2)
 	pkgrel=$(grep -E '^pkgrel=' "$pkgfile" | cut -d= -f2)

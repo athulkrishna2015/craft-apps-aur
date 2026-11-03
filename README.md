@@ -12,6 +12,9 @@ This repository maintains prebuilt AUR packages for the Linux releases of Storyt
 | SoundCraft | [soundcraft-bin](https://aur.archlinux.org/packages/soundcraft-bin) | [storytold/soundcraft](https://github.com/storytold/soundcraft) |
 | FigCraft | [figcraft-bin](https://aur.archlinux.org/packages/figcraft-bin) | [storytold/figcraft](https://github.com/storytold/figcraft) |
 | Craft Launcher | [craft-launcher-bin](https://aur.archlinux.org/packages/craft-launcher-bin) | [storytold/craft-launcher](https://github.com/storytold/craft-launcher) |
+| Craft Anything | [craft-anything-bin](https://aur.archlinux.org/packages/craft-anything-bin) | [storytold/craft-anything](https://github.com/storytold/craft-anything) |
+| TextureCraft | [texturecraft-bin](https://aur.archlinux.org/packages/texturecraft-bin) | [storytold/texturecraft](https://github.com/storytold/texturecraft) |
+| MaterialCraft | [materialcraft-bin](https://aur.archlinux.org/packages/materialcraft-bin) | [storytold/materialcraft](https://github.com/storytold/materialcraft) |
 
 The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Each `PKGBUILD` supports both `x86_64` and `aarch64`. `makepkg` selects the matching artifact for the build architecture.
 
@@ -46,6 +49,9 @@ cadcraft-bin/
 soundcraft-bin/
 figcraft-bin/
 craft-launcher-bin/
+craft-anything-bin/
+texturecraft-bin/
+materialcraft-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.

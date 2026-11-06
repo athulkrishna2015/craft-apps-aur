@@ -66,8 +66,21 @@ for dir in *-bin; do
 	fi
 
 	if (( PUSH )); then
+		# Avoid rapid-fire SSH sessions to AUR from the same CI runner IP.
+		# A small jittered delay between repos reduces chance of the AUR
+		# SSH daemon dropping connections.
+		sleep "${AUR_CLONE_DELAY:-2}.$((RANDOM % 90 + 10))"
 		work=$(mktemp -d)
-		if ! git clone -q "ssh://aur@aur.archlinux.org/$dir.git" "$work/$dir" 2>/tmp/clone-err; then
+		clone_ok=0
+		for attempt in 1 2 3; do
+			if git clone -q "ssh://aur@aur.archlinux.org/$dir.git" "$work/$dir" 2>/tmp/clone-err; then
+				clone_ok=1
+				break
+			fi
+			# Exponential backoff: 5s, 10s, 15s after attempts 1 and 2.
+			[[ $attempt -lt 3 ]] && sleep $((attempt * 5))
+		done
+		if (( ! clone_ok )); then
 			echo "$dir: AUR clone failed: $(cat /tmp/clone-err)" >&2
 			rm -rf "$work"
 			failed+=("$dir")
@@ -84,10 +97,12 @@ for dir in *-bin; do
 		pkgrel=$(grep -E '^pkgrel=' "$pkgfile" | cut -d= -f2)
 		git -C "$work/$dir" -c user.name="${GIT_AUTHOR_NAME:-aur}" -c user.email="${GIT_AUTHOR_EMAIL:-aur@localhost}" \
 			commit -qm "Update to $latest-$pkgrel"
-		if ! git -C "$work/$dir" push -q; then
-			echo "$dir: AUR push failed" >&2
-			failed+=("$dir")
-		fi
+		for attempt in 1 2 3; do
+			if git -C "$work/$dir" push -q; then
+				break
+			fi
+			[[ $attempt -lt 3 ]] && sleep $((attempt * 5))
+		done || { echo "$dir: AUR push failed" >&2; failed+=("$dir"); }
 		rm -rf "$work"
 		printf '%s: pushed %s-%s to AUR\n' "$dir" "$latest" "$pkgrel"
 	fi

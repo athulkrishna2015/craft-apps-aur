@@ -1,4 +1,4 @@
-# Storytold Craft apps — AUR binary packages
+# AUR binary packages for Craft apps and friends
 
 This repository maintains prebuilt AUR packages for the Linux releases of Storytold apps:
 
@@ -15,8 +15,9 @@ This repository maintains prebuilt AUR packages for the Linux releases of Storyt
 | Craft Anything | [craft-anything-bin](https://aur.archlinux.org/packages/craft-anything-bin) | [storytold/craft-anything](https://github.com/storytold/craft-anything) |
 | TextureCraft | [texturecraft-bin](https://aur.archlinux.org/packages/texturecraft-bin) | [storytold/texturecraft](https://github.com/storytold/texturecraft) |
 | MaterialCraft | [materialcraft-bin](https://aur.archlinux.org/packages/materialcraft-bin) | [storytold/materialcraft](https://github.com/storytold/materialcraft) |
+| MisterDownloadManager | [misterdownloadmanager-bin](https://aur.archlinux.org/packages/misterdownloadmanager-bin) | [anefzaoui/misterdownloadmanager](https://github.com/anefzaoui/misterdownloadmanager) |
 
-The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Each `PKGBUILD` supports both `x86_64` and `aarch64`. `makepkg` selects the matching artifact for the build architecture.
+The packages install upstream prebuilt Linux release tarballs; they do not compile the applications. Most `PKGBUILD`s support both `x86_64` and `aarch64`; `misterdownloadmanager-bin` is `x86_64`-only because upstream does not ship an `aarch64` tarball. `makepkg` selects the matching artifact for the build architecture.
 
 ## Automatic updates
 
@@ -52,6 +53,7 @@ craft-launcher-bin/
 craft-anything-bin/
 texturecraft-bin/
 materialcraft-bin/
+misterdownloadmanager-bin/
 ```
 
 The package definitions track fixed upstream release versions, as required for reliable AUR updates; they do not resolve a floating `latest` version during package installation.

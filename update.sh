@@ -12,6 +12,9 @@ failed=()
 
 for dir in *-bin; do
 	[[ -d "$dir" ]] || continue
+	# Packages marked .no-autoupdate are maintained manually (e.g. third-party
+	# upstreams that do not follow the storytold/* release conventions).
+	[[ -f "$dir/.no-autoupdate" ]] && continue
 	pkgfile="$dir/PKGBUILD"
 	_pkgname="${dir%-bin}"
 	# Release artifacts can be named after the binary rather than the repo
@@ -19,7 +22,11 @@ for dir in *-bin; do
 	# to override; it defaults to the repo name.
 	_distname=$(grep -E '^_distname=' "$pkgfile" | cut -d= -f2- | tr -d "'\"" || true)
 	_distname="${_distname:-$_pkgname}"
-	url="https://github.com/storytold/$_pkgname"
+	# Allow non-storytold upstreams via _upstream_url in PKGBUILD.
+	_upstream_url=$(grep -E '^_upstream_url=' "$pkgfile" | cut -d= -f2- | tr -d "'\"") || true
+	url="${_upstream_url:-https://github.com/storytold/$_pkgname}"
+	# Extract owner/repo for the GitHub API from the URL.
+	_api_path="${url#https://github.com/}"
 
 	# Authenticate GitHub API calls when a token is available. Unauthenticated
 	# requests are capped at 60/hour per IP and GitHub-hosted runners share IPs,
@@ -30,7 +37,7 @@ for dir in *-bin; do
 	fi
 
 	release_json=$(curl -fsSL "${api_args[@]}" \
-		"https://api.github.com/repos/storytold/$_pkgname/releases/latest") \
+		"https://api.github.com/repos/$_api_path/releases/latest") \
 		|| { echo "$dir: GitHub API request failed (rate limited? set GITHUB_TOKEN)" >&2; failed+=("$dir"); continue; }
 	tag=$(python3 -c 'import sys,json; print(json.load(sys.stdin)["tag_name"])' <<<"$release_json") \
 		|| { echo "$dir: could not parse latest release tag" >&2; failed+=("$dir"); continue; }
@@ -46,9 +53,8 @@ for dir in *-bin; do
 			"$url/releases/download/$tag/SHA256SUMS.txt")
 		getsum() { grep -E "  $_distname-$latest-linux-$1\.tar\.gz$" <<<"$sums" | cut -d' ' -f1; }
 		sha_x86=$(getsum x86_64)
-		sha_arm=$(getsum aarch64)
-		if [[ -z "$sha_x86" || -z "$sha_arm" ]]; then
-			echo "$dir: hashes missing in SHA256SUMS.txt" >&2
+		if [[ -z "$sha_x86" ]]; then
+			echo "$dir: x86_64 hash missing in SHA256SUMS.txt" >&2
 			failed+=("$dir")
 			continue
 		fi
@@ -56,9 +62,19 @@ for dir in *-bin; do
 		if ! sed -i -e "s/^pkgver=.*/pkgver=$latest/" -e 's/^pkgrel=.*/pkgrel=1/' "$pkgfile"; then
 			echo "$dir: failed to rewrite pkgver" >&2; failed+=("$dir"); continue
 		fi
-		if ! sed -i -e "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$sha_x86')/" \
-			-e "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$sha_arm')/" "$pkgfile"; then
-			echo "$dir: failed to rewrite sha256sums" >&2; failed+=("$dir"); continue
+		if ! sed -i -e "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$sha_x86')/" "$pkgfile"; then
+			echo "$dir: failed to rewrite sha256sums_x86_64" >&2; failed+=("$dir"); continue
+		fi
+
+		# aarch64 is optional: only update if the PKGBUILD ships it.
+		if grep -qE '^source_aarch64=' "$pkgfile"; then
+			sha_arm=$(getsum aarch64)
+			if [[ -z "$sha_arm" ]]; then
+				echo "$dir: aarch64 hash missing in SHA256SUMS.txt" >&2; failed+=("$dir"); continue
+			fi
+			if ! sed -i -e "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$sha_arm')/" "$pkgfile"; then
+				echo "$dir: failed to rewrite sha256sums_aarch64" >&2; failed+=("$dir"); continue
+			fi
 		fi
 		if ! (cd "$dir" && makepkg --printsrcinfo > .SRCINFO); then
 			echo "$dir: makepkg failed" >&2; failed+=("$dir"); continue
